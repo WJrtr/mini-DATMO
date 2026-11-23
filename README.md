@@ -2,7 +2,7 @@
 
 用 LiDAR 幾何方法自動標註移動物體的小專案。
 
-起點是王傑智老師等人的 *Simultaneous Localization, Mapping and Moving Object Tracking*（IJRR 2007）。我想實際動手做，看看論文 §7.1 用「一致性」判斷移動物體的方法，放到 3D LiDAR 上會怎麼樣。做到一半讀了 Bonn 大學的 LMNet（RA-L 2021）和 AutoMOS（RA-L 2022），發現這套流程跟 AutoMOS 的離線自動標註幾乎一樣，於是改成照 AutoMOS 的架構實作，並在 SemanticKITTI 上用同樣的指標和論文比較。
+起初讀了王傑智老師等人的 *Simultaneous Localization, Mapping and Moving Object Tracking*（IJRR 2007）。實際動手做，看看論文 §7.1 用「一致性」判斷移動物體的方法，放到 3D LiDAR 上會怎麼樣。做到一半讀了 Bonn 大學的 LMNet（RA-L 2021）和 AutoMOS（RA-L 2022），發現這套流程跟 AutoMOS 的離線自動標註幾乎一樣，於是改成照 AutoMOS 的架構實作，並在 SemanticKITTI 上用同樣的指標和論文比較。
 
 目前還在進行中，下面的數字都是用 repo 裡的程式實際跑出來的。
 
@@ -10,9 +10,9 @@
 
 流程分成幾步：
 
-1. **讀資料、對齊位姿**（`kitti_io.py`）
+1. **讀資料、對齊位置**（`kitti_io.py`）
    SemanticKITTI 的 `poses.txt` 是在左相機座標系，要用 `calib.txt` 的 `Tr` 轉成 LiDAR 座標系：`T_w_velo = inv(Tr) · P · Tr`。
-   檢查方式：把第 k 幀和第 k−5 幀的點都轉到世界座標，看最近點距離的中位數。序列 08 是 0.059 m，不轉換時是 0.471 m。
+   檢查方式：把第 k 幀和第 k−5 幀的點都轉到世界座標，看最近點距離的中位數。
 
 2. **去地面、去掉自己的車身**（`ground.py`）
    把點分進 1 m 的格子，接近格子最低點的就當地面。感測器 2.8 m 以內的點是自己的車，一開始沒去掉，這些點跟著車子一起移動，結果被追蹤成一條很長的「移動物體」軌跡。
