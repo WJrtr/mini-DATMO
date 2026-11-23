@@ -1,0 +1,15 @@
+# 只上傳程式、README、結果數字和圖。
+# 不上傳：資料集、壓縮檔、論文 PDF（版權）、個人筆記 vault、AI 設定、計畫草稿。
+/*
+!/.gitignore
+!/README.md
+!/mini_datmo/
+!/docs/
+!/results/
+
+mini_datmo/out/
+__pycache__/
+*.pyc
+*.npy
+*.label
+*.bin

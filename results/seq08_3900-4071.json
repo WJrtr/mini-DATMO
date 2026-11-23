@@ -1,0 +1,26 @@
+{
+  "raw": {
+    "ghost_voxels": 13101,
+    "dyn_voxels": 13101,
+    "static_kept": 1.0,
+    "points_removed": 0
+  },
+  "ours": {
+    "ghost_voxels": 3787,
+    "dyn_voxels": 13101,
+    "static_kept": 0.999196995588372,
+    "points_removed": 67623
+  },
+  "lmnet": {
+    "ghost_voxels": 2472,
+    "dyn_voxels": 13101,
+    "static_kept": 0.9996425651094584,
+    "points_removed": 77388
+  },
+  "gt": {
+    "ghost_voxels": 0,
+    "dyn_voxels": 13101,
+    "static_kept": 1.0,
+    "points_removed": 81765
+  }
+}

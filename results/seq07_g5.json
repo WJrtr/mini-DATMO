@@ -1,0 +1,75 @@
+{
+  "consistency_only": {
+    "all": {
+      "iou": 0.17150335097153216,
+      "precision": 0.19379867998307904,
+      "recall": 0.5985171158211773,
+      "tp": 639087,
+      "fp": 2658598,
+      "fn": 428697
+    },
+    "within40": {
+      "iou": 0.1718294984364031,
+      "precision": 0.19379867998307904,
+      "recall": 0.6025081289814096,
+      "tp": 639087,
+      "fp": 2658598,
+      "fn": 421624
+    }
+  },
+  "labeler": {
+    "all": {
+      "iou": 0.3195871926245592,
+      "precision": 0.5409237828334054,
+      "recall": 0.43852970263648827,
+      "tp": 468255,
+      "fp": 397403,
+      "fn": 599529
+    },
+    "within40": {
+      "iou": 0.3211374419284089,
+      "precision": 0.5409237828334054,
+      "recall": 0.44145389271912894,
+      "tp": 468255,
+      "fp": 397403,
+      "fn": 592456
+    }
+  },
+  "lmnet": {
+    "all": {
+      "iou": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0
+    },
+    "within40": {
+      "iou": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "tracks": {
+    "total": 485,
+    "moving": 42
+  },
+  "args": {
+    "data": "seq07",
+    "frames": null,
+    "gap": "5",
+    "merge": "or",
+    "horizon": 0,
+    "min_votes": 1,
+    "ratio_thr": 0.15,
+    "kw": "",
+    "pose_noise": 0.0,
+    "seed": 0,
+    "no_ego_motion": false,
+    "out": "out/seq07_g5",
+    "json": "out/results/seq07_g5.json"
+  }
+}
