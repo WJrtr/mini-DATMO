@@ -1,0 +1,57 @@
+{
+  "consistency_only": {
+    "all": {
+      "iou": 0.3789108749990327,
+      "precision": 0.48043150079126234,
+      "recall": 0.6419800259228459,
+      "tp": 685496,
+      "fp": 741338,
+      "fn": 382288
+    },
+    "within40": {
+      "iou": 0.3803980912838663,
+      "precision": 0.48043150079126234,
+      "recall": 0.6462608571043386,
+      "tp": 685496,
+      "fp": 741338,
+      "fn": 375215
+    }
+  },
+  "labeler": {
+    "all": {
+      "iou": 0.6083303247475647,
+      "precision": 0.8263639621726641,
+      "recall": 0.6974846972795996,
+      "tp": 744763,
+      "fp": 156490,
+      "fn": 323021
+    },
+    "within40": {
+      "iou": 0.6118652547935797,
+      "precision": 0.8263639621726641,
+      "recall": 0.7021356429790961,
+      "tp": 744763,
+      "fp": 156490,
+      "fn": 315948
+    }
+  },
+  "tracks": {
+    "total": 1439,
+    "moving": 118
+  },
+  "args": {
+    "data": "seq07",
+    "frames": null,
+    "gap": "5,10,20,40,80",
+    "merge": "or",
+    "horizon": 0,
+    "min_votes": 3,
+    "ratio_thr": 0.15,
+    "kw": "",
+    "pose_noise": 0.0,
+    "seed": 0,
+    "no_ego_motion": false,
+    "out": "out/seq07_final",
+    "json": "out/results/final/seq07_full.json"
+  }
+}

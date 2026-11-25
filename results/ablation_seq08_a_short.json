@@ -1,0 +1,75 @@
+{
+  "consistency_only": {
+    "all": {
+      "iou": 0.0674101855167178,
+      "precision": 0.07295160201415939,
+      "recall": 0.4701821562254187,
+      "tp": 782440,
+      "fp": 9943027,
+      "fn": 881681
+    },
+    "within40": {
+      "iou": 0.06755146154153636,
+      "precision": 0.07295160201415939,
+      "recall": 0.47714236580752095,
+      "tp": 782440,
+      "fp": 9943027,
+      "fn": 857406
+    }
+  },
+  "labeler": {
+    "all": {
+      "iou": 0.3566480952058778,
+      "precision": 0.7370778844225735,
+      "recall": 0.40863434810329297,
+      "tp": 680017,
+      "fp": 242568,
+      "fn": 984104
+    },
+    "within40": {
+      "iou": 0.36124731329027515,
+      "precision": 0.7370778844225735,
+      "recall": 0.4146834519826862,
+      "tp": 680017,
+      "fp": 242568,
+      "fn": 959829
+    }
+  },
+  "lmnet": {
+    "all": {
+      "iou": 0.584056623520764,
+      "precision": 0.754616942952617,
+      "recall": 0.72098723590412,
+      "tp": 1199810,
+      "fp": 390149,
+      "fn": 464311
+    },
+    "within40": {
+      "iou": 0.5935786808762131,
+      "precision": 0.7679389500780799,
+      "recall": 0.7233221900105253,
+      "tp": 1186137,
+      "fp": 358435,
+      "fn": 453709
+    }
+  },
+  "tracks": {
+    "total": 2808,
+    "moving": 171
+  },
+  "args": {
+    "data": "seq08",
+    "frames": null,
+    "gap": "5",
+    "merge": "or",
+    "horizon": 0,
+    "min_votes": 1,
+    "ratio_thr": 0.15,
+    "kw": "ego_radius=2.8,cand_grow=0,max_extent_track=8",
+    "pose_noise": 0.0,
+    "seed": 0,
+    "no_ego_motion": false,
+    "out": null,
+    "json": "out/results/final/ablation_seq08_a_short.json"
+  }
+}

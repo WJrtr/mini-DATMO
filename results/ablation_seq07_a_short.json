@@ -1,0 +1,57 @@
+{
+  "consistency_only": {
+    "all": {
+      "iou": 0.17150335097153216,
+      "precision": 0.19379867998307904,
+      "recall": 0.5985171158211773,
+      "tp": 639087,
+      "fp": 2658598,
+      "fn": 428697
+    },
+    "within40": {
+      "iou": 0.1718294984364031,
+      "precision": 0.19379867998307904,
+      "recall": 0.6025081289814096,
+      "tp": 639087,
+      "fp": 2658598,
+      "fn": 421624
+    }
+  },
+  "labeler": {
+    "all": {
+      "iou": 0.3274850809029071,
+      "precision": 0.5868963272728211,
+      "recall": 0.425587010106913,
+      "tp": 454435,
+      "fp": 319867,
+      "fn": 613349
+    },
+    "within40": {
+      "iou": 0.32916285787546956,
+      "precision": 0.5868963272728211,
+      "recall": 0.4284248961309914,
+      "tp": 454435,
+      "fp": 319867,
+      "fn": 606276
+    }
+  },
+  "tracks": {
+    "total": 487,
+    "moving": 42
+  },
+  "args": {
+    "data": "seq07",
+    "frames": null,
+    "gap": "5",
+    "merge": "or",
+    "horizon": 0,
+    "min_votes": 1,
+    "ratio_thr": 0.15,
+    "kw": "ego_radius=2.8,cand_grow=0,max_extent_track=8",
+    "pose_noise": 0.0,
+    "seed": 0,
+    "no_ego_motion": false,
+    "out": null,
+    "json": "out/results/final/ablation_seq07_a_short.json"
+  }
+}

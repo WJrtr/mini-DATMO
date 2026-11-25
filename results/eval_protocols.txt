@@ -1,0 +1,8 @@
+== seq08 0:4071，unlabeled/outlier 占所有點 2.58%
+  out/seq08                    所有點     P  89.7  R  58.0  IoU  54.4   (TP 964,532 FP 110,256 FN 699,589)
+  out/seq08                    忽略 0/1  P  93.3  R  58.0  IoU  55.6   (TP 964,532 FP 69,154 FN 699,589)
+  LMNet                        所有點     P  75.5  R  72.1  IoU  58.4   (TP 1,199,810 FP 390,149 FN 464,311)
+  LMNet                        忽略 0/1  P  78.0  R  72.1  IoU  59.9   (TP 1,199,810 FP 339,183 FN 464,311)
+== seq07 0:1101，unlabeled/outlier 占所有點 2.12%
+  out/seq07                    所有點     P  96.1  R  88.6  IoU  85.6   (TP 946,130 FP 37,906 FN 121,654)
+  out/seq07                    忽略 0/1  P  96.2  R  88.6  IoU  85.6   (TP 946,130 FP 37,199 FN 121,654)

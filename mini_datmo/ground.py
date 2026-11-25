@@ -9,7 +9,7 @@ Velodyne 離地約 1.73 m（KITTI），所以地面大約在 z = -1.73。
 import numpy as np
 
 
-def ego_mask(pts: np.ndarray, radius=2.8) -> np.ndarray:
+def ego_mask(pts: np.ndarray, radius=2.0) -> np.ndarray:
     """自己車身的點（感測器水平距離 < radius）。這些點跟著車子移動，在世界座標裡會被誤認為移動物體。"""
     return np.linalg.norm(pts[:, :2], axis=1) < radius
 

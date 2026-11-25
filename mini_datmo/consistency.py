@@ -5,6 +5,10 @@
   2. 把第 k 幀的點轉到參考幀的感測器座標：inv(T_w_velo[j]) · T_w_velo[k]。
   3. r < r_ref - δ(r) → 這個點落在參考幀看得穿的空間裡 → 候選移動。
      δ(r) = delta_abs + delta_rel · r（遠處光束較寬、位姿誤差被放大）。
+  4. need_return=True（預設）：參考幀那個方向要真的有回波（r_ref 有限）才算看穿。
+     沒有回波的格子在距離圖裡是 inf，r < inf 永遠成立；但沒有回波只代表「沒有資訊」，
+     不代表光束穿過了那個位置。點離參考幀很遠時（例如 8 秒前，車已開了 80 m）幾乎都是這種情況。
+     2026-11-25 之前沒有這個條件（need_return=False），大部分的誤判候選點來自這裡。
 雙向合併：merge="or" 任一方向是候選就算（召回率高）；"and" 兩個方向都要（精確率高）。
 """
 import numpy as np
@@ -18,7 +22,9 @@ def transform(pts_xyz: np.ndarray, T: np.ndarray) -> np.ndarray:
 
 class ConsistencyDetector:
     def __init__(self, ds, gap=5, delta_abs=0.5, delta_rel=0.02, max_range=40.0, merge="or",
-                 poses=None, min_votes=1, cache_size=400):
+                 poses=None, min_votes=1, cache_size=400, need_return=True, max_ref_range=None):
+        self.need_return = need_return      # True：參考幀那個方向要真的有回波（r_ref 有限）才算看穿
+        self.max_ref_range = max_ref_range  # 點離參考幀感測器超過這個距離就不判斷（太遠時光束很稀疏）
         self.ds = ds
         self.min_votes = min_votes
         self.cache_size = cache_size
@@ -40,7 +46,12 @@ class ConsistencyDetector:
     def _against(self, k, j, xyz_k):
         T_j_k = np.linalg.inv(self.T[j]) @ self.T[k]
         r, r_ref = lookup(self._ref_image(j), transform(xyz_k, T_j_k))
-        return r < r_ref - (self.delta_abs + self.delta_rel * r)
+        out = r < r_ref - (self.delta_abs + self.delta_rel * r)
+        if self.need_return:
+            out &= np.isfinite(r_ref)
+        if self.max_ref_range is not None:
+            out &= r < self.max_ref_range
+        return out
 
     def candidates(self, k, xyz_k, nonground):
         """回傳 (N,) bool：候選移動點。只對非地面、max_range 內的點判斷。"""

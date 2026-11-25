@@ -1,25 +1,25 @@
 {
   "raw": {
-    "ghost_voxels": 13101,
-    "dyn_voxels": 13101,
+    "ghost_voxels": 13086,
+    "dyn_voxels": 13086,
     "static_kept": 1.0,
     "points_removed": 0
   },
   "ours": {
-    "ghost_voxels": 3787,
-    "dyn_voxels": 13101,
-    "static_kept": 0.999196995588372,
-    "points_removed": 67623
+    "ghost_voxels": 2247,
+    "dyn_voxels": 13086,
+    "static_kept": 0.9987155569013176,
+    "points_removed": 75845
   },
   "lmnet": {
-    "ghost_voxels": 2472,
-    "dyn_voxels": 13101,
-    "static_kept": 0.9996425651094584,
-    "points_removed": 77388
+    "ghost_voxels": 2470,
+    "dyn_voxels": 13086,
+    "static_kept": 0.9994530128248957,
+    "points_removed": 77503
   },
   "gt": {
     "ghost_voxels": 0,
-    "dyn_voxels": 13101,
+    "dyn_voxels": 13086,
     "static_kept": 1.0,
     "points_removed": 81765
   }

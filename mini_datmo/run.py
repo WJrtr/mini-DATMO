@@ -1,7 +1,8 @@
 """mini-DATMO 主程式：跑標註器、輸出 .label、評估。
 
 例：
-  python run.py --data seq08 --frames 0:4071 --out out/seq08_g5
+  python run.py --data seq08 --frames 0:4071 --out out/seq08
+  python run.py --data seq08 --gap 5 --min-votes 1 --kw "ego_radius=2.8,cand_grow=0,max_extent_track=8,need_return=False,stop_extend=False"   # 第一版（只看前後 0.5 秒）
   python run.py --data seq08 --frames 0:500 --pose-noise 5 --seed 0
   python run.py --data seq08 --frames 0:500 --no-ego-motion
 """
@@ -36,11 +37,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="seq08")
     ap.add_argument("--frames", default=None, help="a:b")
-    ap.add_argument("--gap", default="5", help="例如 5 或 5,10,20")
+    ap.add_argument("--gap", default="5,10,20,40,80", help="參考幀間隔，例如 5 或 5,10,20")
     ap.add_argument("--merge", default="or", choices=["or", "and"])
     ap.add_argument("--horizon", type=int, default=0,
                     help=">0 時改用長時間可見性：和 ±5, ±15, ... ±horizon 幀比較（類似整段序列的地圖清理）")
-    ap.add_argument("--min-votes", type=int, default=1)
+    ap.add_argument("--min-votes", type=int, default=3, help="至少幾個參考幀看穿才算候選")
     ap.add_argument("--ratio-thr", type=float, default=0.15)
     ap.add_argument("--kw", default="", help='其他 Labeler 參數，例如 "refine=0.5,disp_factor=0.5"')
     ap.add_argument("--pose-noise", type=float, default=0.0)

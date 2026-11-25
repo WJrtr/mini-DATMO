@@ -3,6 +3,7 @@
 輸出到 docs/report_figures/*.png。主要示範幀 K = 45（一台約 9.6 m/s 的車正從前方駛近，
 旁邊還有兩台停在路口、但被人工標成「移動」的車）。
 """
+import json
 import os
 import sys
 
@@ -14,7 +15,6 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from cluster import cluster  # noqa: E402
 from consistency import transform  # noqa: E402
 from ground import ego_mask, ground_mask  # noqa: E402
 from kitti_io import load_dataset  # noqa: E402
@@ -97,7 +97,7 @@ ax.scatter(xyz[g, 0], xyz[g, 1], s=0.3, c=LIGHT, label=f"地面 {g.sum():,} 點"
 ng = ~g & ~e
 ax.scatter(xyz[ng, 0], xyz[ng, 1], s=0.5, c=INK, label=f"非地面 {ng.sum():,} 點")
 ax.scatter(xyz[e, 0], xyz[e, 1], s=6, c=RED, label=f"自己的車身 {e.sum()} 點")
-ax.add_patch(plt.Circle((0, 0), 2.8, fill=False, ls="--", color=RED, lw=1.5))
+ax.add_patch(plt.Circle((0, 0), 2.0, fill=False, ls="--", color=RED, lw=1.5))
 bev(ax, 30)
 ax.legend(loc="upper left", markerscale=12, fontsize=14, framealpha=0.9)
 ax.set_title("(a) 鳥瞰")
@@ -130,8 +130,16 @@ ax.set_ylabel("仰角（°）")
 save(fig, "04_range_image.png")
 
 # ---------------------------------------------------------------- Labeler（前 200 幀）
-L = Labeler(ds, refine=0.5)
-out = L.run(range(0, 200))
+L = Labeler(ds)
+snap = {}
+
+
+def keep_clusters(k, pts_, g_, cand_, cid_, cl_):
+    if k == K:
+        snap["cl"] = cl_
+
+
+out = L.run(range(0, 200), hook=keep_clusters)
 cand = out[K]["cand"]
 lab = out[K]["label"]
 lm = ds.lmnet(K)
@@ -148,16 +156,18 @@ for ax, mask, color, title in [(axes[0], cand, ORANGE, f"(a) 一致性候選點�
 save(fig, "05_candidates_vs_gt.png")
 
 # ---------------------------------------------------------------- 06 分群
-_, cl = cluster(xyz, ~(g | e))
+cl = snap["cl"]  # 只對離候選點 0.5 m 內的非地面點分群
 fig, ax = plt.subplots(figsize=(15, 8.6))
 ax.scatter(xyz[g, 0], xyz[g, 1], s=0.2, c="#ECEAE4")
+ax.scatter(xyz[ng, 0], xyz[ng, 1], s=0.4, c=LIGHT)
 pal = ["#2F6FB0", "#6A4C93", "#2A9D8F", "#8D6E63", "#5C677D", "#B56576", "#3D5A80", "#7B9E3E"]
 for i, q in enumerate(cl):
     r = cand[q["idx"]].mean()
     p = xyz[q["idx"]]
-    col = ORANGE if r >= 0.05 else pal[i % len(pal)]
-    ax.scatter(p[:, 0], p[:, 1], s=0.8, color=col)
-    if r >= 0.05 and q["extent"] < 8 and np.abs(q["center"][:2]).max() < 30:
+    sent = r >= L.track_ratio and q["extent"] < L.max_extent_track
+    col = ORANGE if sent else pal[i % len(pal)]
+    ax.scatter(p[:, 0], p[:, 1], s=1.6, color=col)
+    if sent and abs(q["center"][0]) < 28 and abs(q["center"][1]) < 17:
         ax.add_patch(plt.Rectangle(q["bbox_min"][:2], *(q["bbox_max"][:2] - q["bbox_min"][:2]),
                                    fill=False, ec=INK, lw=1.2))
         ax.text(q["bbox_max"][0] + 0.4, q["bbox_max"][1], f"{r:.2f}", fontsize=13, color=INK)
@@ -214,7 +224,7 @@ save(fig, "08_final_vs_lmnet.png")
 
 # ---------------------------------------------------------------- 09 慢速車：中心抖動
 ds2 = ds
-L2 = Labeler(ds2, refine=0.5)
+L2 = Labeler(ds2)
 out2 = L2.run(range(3150, 3330))
 key2t = {h: t for t in L2.track_info for h in t["history"]}
 gtc, trk = [], {}
@@ -238,13 +248,15 @@ gk = np.array([x[0] for x in gtc])
 gw = np.array([x[1] for x in gtc])
 d0 = gw[0]
 ax.plot(gk, np.linalg.norm(gw - d0, axis=1), color=BLUE, lw=3, label="真值物體中心離起點的距離")
-for (tid, (t, pts_)), col in zip(trk.items(), [ORANGE, RED, "#6A4C93"]):
+top = sorted(trk.items(), key=lambda x: -len(x[1][1]))[:3]  # 和這台車重疊最多幀的三條 track
+for (tid, (t, pts_)), col in zip(sorted(top, key=lambda x: x[1][1][0][0]), [ORANGE, RED, "#6A4C93"]):
     kk = np.array([x[0] for x in pts_])
     ww = np.array([x[1] for x in pts_])
+    verdict = "判為移動" if t["moving"] else "判為靜止"
     ax.plot(kk, np.linalg.norm(ww - d0, axis=1), "o-", color=col, lw=2,
-            label=f"track {tid}：淨位移 {t['disp']:.2f} m，直線度 {t['straight']:.2f} → 判為靜止")
+            label=f"track {tid}：淨位移 {t['disp']:.2f} m，直線度 {t['straight']:.2f} → {verdict}")
 ax.axhline(4.0, color=GREY, ls="--")
-ax.text(gk[0] + 1, 4.15, "要判為移動：淨位移需 > 外框約 4 m", color=INK, fontsize=14)
+ax.text(gk[0] + 1, 4.15, "要判為移動：淨位移 > 外框約 4 m，且直線度 ≥ 0.6", color=INK, fontsize=14)
 ax.set_xlabel("幀")
 ax.set_ylabel("離起點的距離（m）")
 ax.legend(loc="upper left", fontsize=13)
@@ -253,7 +265,16 @@ save(fig, "09_slow_car.png")
 # ---------------------------------------------------------------- 10 結果長條圖
 fig, ax = plt.subplots(figsize=(15, 6.8))
 names = ["本專案\n序列 07", "本專案\n序列 08", "AutoMOS\n只用可見性", "LMNet\n官方預測（08）", "AutoMOS\n完整方法"]
-vals = [32.0, 35.3, 36.6, 58.4, 74.2]
+RES = os.path.join(HERE, "..", "..", "results")
+
+
+def load(name):
+    with open(os.path.join(RES, name)) as f:
+        return json.load(f)
+
+
+vals = [100 * load("seq07_full.json")["labeler"]["all"]["iou"], 100 * load("seq08_full.json")["labeler"]["all"]["iou"],
+        36.6, 100 * load("seq08_full.json")["lmnet"]["all"]["iou"], 74.2]  # 36.6、74.2：AutoMOS Table I
 cols = [ORANGE, ORANGE, GREY, BLUE, INK]
 bars = ax.bar(names, vals, color=cols, width=0.62)
 for b, v in zip(bars, vals):
@@ -266,9 +287,13 @@ save(fig, "10_iou_comparison.png")
 
 # ---------------------------------------------------------------- 11 依速度分組
 fig, ax = plt.subplots(figsize=(15, 6.8))
-groups = ["停住\n< 0.5 m/s（21%）", "慢\n0.5–2 m/s（28%）", "移動\n> 2 m/s（51%）"]
-ours = [0.0, 15.8, 74.2]
-lmn = [42.1, 62.5, 89.9]
+sp = load("seq08_by_speed.json")
+bins = ["stopped(<0.5)", "slow(0.5-2)", "moving(>2)"]
+n_gt = sum(sp["ours"][b]["gt"] for b in bins + ["unknown"])
+share = [100 * sp["ours"][b]["gt"] / n_gt for b in bins]
+groups = [f"暫停\n< 0.5 m/s（{share[0]:.0f}%）", f"慢速\n0.5–2 m/s（{share[1]:.0f}%）", f"快速\n> 2 m/s（{share[2]:.0f}%）"]
+ours = [100 * sp["ours"][b]["recall"] for b in bins]
+lmn = [100 * sp["lmnet"][b]["recall"] for b in bins]
 x = np.arange(3)
 b1 = ax.bar(x - 0.2, ours, 0.38, color=ORANGE, label="本專案")
 b2 = ax.bar(x + 0.2, lmn, 0.38, color=BLUE, label="LMNet")
@@ -284,3 +309,12 @@ for s in ("top", "right"):
 save(fig, "11_recall_by_speed.png")
 
 print("K =", K, "| cand", int(cand.sum()), "| label", int(lab.sum()), "| gt", int(gt.sum()), "| lmnet", int(lm.sum()))
+print("clusters at K:", len(cl), "| sent:", sum(1 for q in cl if cand[q["idx"]].mean() >= L.track_ratio and q["extent"] < L.max_extent_track))
+for nm, pr in [("ours", lab), ("lmnet", lm)]:
+    print(nm, "TP", int((pr & gt).sum()), "FP", int((pr & ~gt).sum()), "FN", int((~pr & gt).sum()))
+if best:
+    t = best[0]
+    print("best track", t["id"], "n", t["n"], "disp %.1f straight %.2f extent %.1f ratio %.2f" % (t["disp"], t["straight"], t["extent"], t["ratio"]),
+          "| contains K:", any(k == K for k, _ in t["history"]))
+for tid, (t, pts_) in top:
+    print("slow car track", tid, "overlap", len(pts_), "n", t["n"], "disp %.2f straight %.2f moving %s" % (t["disp"], t["straight"], t["moving"]))
