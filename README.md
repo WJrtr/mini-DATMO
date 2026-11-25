@@ -9,7 +9,7 @@
 
 ## 摘要
 
-移動物體分割（Moving Object Segmentation, MOS）的網路需要大量逐點標籤，而人工標註成本高。本專案使用 LiDAR 點雲與已知位姿，自動產生移動物體的逐點標籤：以 Wang 等人 [1] §7.1 的一致性判斷找出候選移動點，再參考 AutoMOS [3] 的流程，以分群、多目標追蹤與軌跡層級的判斷整理成標籤，最後以 SemanticKITTI [4] 的人工標籤評估。第一版只比較前後 0.5 秒，序列 08 的 moving IoU 為 35.7%。之後逐階段統計漏失並修改五處，影響最大的兩處是：參考幀在該方向沒有回波時不再視為看穿，以及沿著移動軌跡標註物體暫時停下的片段。目前序列 08 為 54.4%（precision 89.7%、recall 58.0%），序列 07 為 85.6%，未參與調整的官方測試集（序列 11–21）為 51.2%。序列 08 剩下的漏判主要來自觀察期間幾乎沒有移動的物體。以此標籤去除移動點後建圖，序列 08 `3900:4071` 幀累積地圖中的移動物體殘影減少 83%。
+移動物體分割（Moving Object Segmentation, MOS）的網路需要大量逐點標籤，而人工標註成本高。本專案使用 LiDAR 點雲與已知位姿，自動產生移動物體的逐點標籤：以 Wang 等人 [1] §7.1 的一致性判斷找出候選移動點，再參考 AutoMOS [3] 的流程，以分群、多目標追蹤與軌跡層級的判斷整理成標籤，最後以 SemanticKITTI [4] 的人工標籤評估。第一版只比較前後 0.5 秒，序列 08 的 moving IoU 為 35.7%。之後逐階段統計漏失並修改五處，影響最大的兩處是：參考幀在該方向沒有回波時不再視為看穿，以及沿著移動軌跡標註物體暫時停下的片段。目前序列 08 為 54.4%（precision 89.7%、recall 58.0%），序列 07 為 85.6%，未參與調整的官方測試集（序列 11–21）為 51.2%。序列 08 剩下的漏判主要來自觀察期間幾乎沒有移動的物體。
 
 ## 1. 方法
 
@@ -76,13 +76,6 @@ r < r_{\text{ref}} - (\delta_a + \delta_r\, r), \qquad \delta_a = 0.5\ \text{m},
 
 **測試集。** 以相同的預設設定標註 SemanticKITTI 測試序列 11–21，提交到官方 Codabench 評分伺服器，moving IoU 為 51.2%。測試集的人工標籤不公開，沒有參與任何設定的選擇。官方計分忽略 unlabeled／outlier 點，同一口徑下序列 08 為 55.6%。
 
-**建圖示例。** 把標為移動的點去掉，再將點雲疊成靜態地圖。序列 08 的一段路中，只含移動點的殘影格由 13,086 降到 2,247（約少 83%）。 [建圖結果](results/seq08_3900-4071.json)
-
-<p align="center">
-  <img src="docs/figures/mapping_seq08_3900-4071.png" width="96%"><br>
-  <sub><b>圖 5.</b> 累積地圖。由左至右為未去除移動點、本專案、LMNet、人工標註。紅色是仍留在地圖上的真值移動點。</sub>
-</p>
-
 ## 3. 目前限制
 
 - **暫停太久的車容易漏標。** 序列 08 開頭的兩台車在 LiDAR 看得到的期間幾乎沒動，程式很難找到可用的移動軌跡，停留延伸也就接不上。 [暫停車輛分析](results/stopped_objects_seq08.txt)
@@ -122,7 +115,6 @@ python eval_by_speed.py --pred out/seq08/predictions                   # 依速�
 python checks/funnel.py --data seq08                                   # 誤差分析：各階段的漏失與誤判來源
 python checks/stopped_oracle.py --pred out/seq08/predictions           # 誤差分析：暫停的點來自哪些物體
 python checks/try_stop_extend.py --data seq07 --frames 0:1101          # 每一個停留延伸的結果
-python mapping.py --pred out/seq08/predictions --frames 3900:4071      # 圖 5
 python report/make_figures.py                                          # 圖 1–4
 ```
 
@@ -133,7 +125,7 @@ python report/make_figures.py                                          # 圖 1�
 | `polar.py`、`consistency.py` | 極座標距離圖與一致性偵測 |
 | `cluster.py`、`tracker.py` | DBSCAN 分群；Kalman filter、馬氏距離 gate、匈牙利配對 |
 | `labeler.py` | 標註流程：候選、分群、追蹤、軌跡層級判斷、停留延伸 |
-| `evaluate.py`、`eval_by_speed.py`、`mapping.py` | 評估、速度分組、建圖 |
+| `evaluate.py`、`eval_by_speed.py` | 評估、速度分組 |
 | `checks/check_step0.py` | 位姿對齊的檢查 |
 | `checks/funnel.py`、`checks/candidate_recall.py`、`checks/eval_protocols.py` | 各階段漏失統計、候選階段召回率、兩種評估方式 |
 | `checks/stopped_oracle.py`、`checks/try_stop_extend.py` | 暫停的點屬於哪些物體、每一個停留延伸的結果 |
