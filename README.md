@@ -26,7 +26,7 @@
 T^{w}_{v,k} = T_r^{-1}\, P_k\, T_r .
 ```
 
-相隔 5 幀的非地面點，最近點距離中位數由未轉換時的 0.471 m 降為 0.059 m（[kitti_io.py](mini_datmo/kitti_io.py)）。
+檢查方式：取序列 08 第 1000 幀與第 995 幀（期間自車移動 2.37 m）感測器 30 m 內的非地面點，各自轉到世界座標後，計算第 1000 幀每一點到第 995 幀最近點的距離中位數。不轉換時為 0.527 m，以 $`T^{w}_{v,k}`$ 轉換後為 0.060 m；若把相機位姿 $`P_k`$ 直接套在 LiDAR 點上、不做共軛，為 2.670 m，比不轉換更差（[kitti_io.py](mini_datmo/kitti_io.py)、[檢查結果](results/pose_check.txt)）。
 
 **1.2 去地面與車身。** 將點投影到 1 m × 1 m 的格子，取每格的最低點 $`z_{\min}`$。滿足 $`z - z_{\min} < 0.25`$ m 且 $`z_{\min} < -1.3`$ m 的點視為地面。感測器水平距離 2.0 m 以內的點視為自身車體；未排除時，這些點在世界座標中隨車移動，會被追蹤成一條很長的「移動物體」軌跡（[ground.py](mini_datmo/ground.py)）。
 
@@ -151,6 +151,7 @@ pip install -r mini_datmo/requirements.txt
 python mini_datmo/tools/fetch_sequences.py 07 --out datasets/semantickitti
 
 cd mini_datmo
+python checks/check_step0.py > ../results/pose_check.txt              # 1.1 位姿對齊的檢查
 python run.py --data seq08 --out out/seq08                             # 表 1、表 2 (f)
 python run.py --data seq07 --out out/seq07                             # 表 1、表 2 (f)
 python run.py --data seq08 --kw "stop_extend=False"                    # 表 2 (e)
@@ -178,6 +179,7 @@ python report/make_figures.py                                          # 圖 1�
 | `cluster.py`、`tracker.py` | DBSCAN 分群；Kalman filter、馬氏距離 gate、匈牙利配對 |
 | `labeler.py` | 標註流程：候選、分群、追蹤、軌跡層級判斷、停留延伸 |
 | `evaluate.py`、`eval_by_speed.py`、`mapping.py` | 評估、速度分組、建圖 |
+| `checks/check_step0.py` | 位姿對齊的檢查 |
 | `checks/funnel.py`、`checks/candidate_recall.py`、`checks/eval_protocols.py` | 各階段漏失統計、候選階段召回率、兩種評估方式 |
 | `checks/stopped_oracle.py`、`checks/try_stop_extend.py` | 暫停的點屬於哪些物體、每一個停留延伸的結果 |
 

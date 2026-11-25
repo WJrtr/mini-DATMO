@@ -1,0 +1,8 @@
+非地面點（ground_mask）、感測器 30 m 內；第 k 幀對第 k-5 幀，最近點距離的中位數（m）
+[seq08] frames=4071  path length=3212.3 m  mean speed=7.9 m/s
+   k=1000 vs k-5（自車移動 2.37 m）: identity 0.527 | T_w_velo 0.060 | P only 2.670
+[0005] frames=154  path length=69.4 m  mean speed=4.5 m/s
+   k=50 vs k-5（自車移動 2.22 m）: identity 0.530 | T_w_velo 0.098
+[0060] frames=78  path length=0.1 m  mean speed=0.0 m/s
+   k=40 vs k-5（自車移動 0.00 m）: identity 0.012 | T_w_velo 0.013
+saved to D:\nycu\mini-DATMO\mini_datmo\out\step0
